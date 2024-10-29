@@ -6,8 +6,8 @@
 pthread_mutex_t mutex;
 
 /* Data shared by the thread(s) */
-int sharedCounts = 0;
-int total = 5000;
+int sharedCounts = 0;   // Number of points in the circle
+int total = 5000;       // Total number of points
 
 void *calPiByRandom(void *params)
 {
@@ -20,7 +20,7 @@ void *calPiByRandom(void *params)
     for (int i = 0; i < 1000; i++)
     {
         /* code */
-        x = (double)rand() / RAND_MAX;
+        x = (double)rand() / RAND_MAX; 
         y = (double)rand() / RAND_MAX;
         if (x * x + y * y <= 1)
         {
@@ -40,29 +40,32 @@ int main()
     // Mutex Initialize
     pthread_mutex_init(&mutex, NULL);
 
-    pthread_t tid;       /* the thread identifier */
-    pthread_attr_t attr; /* set of attributes for the thread */
+    pthread_t tid[5];       /* threads identifier */
+    pthread_attr_t attr;    /* the attribute for threads */
 
     /* get the default attributes */
-    pthread_attr_init(&attr);
+    for(int i = 0; i < 5; i++)
+        pthread_attr_init(&attr);
 
     /* create the thread */
     for (int i = 0; i < 5; i++)
     {
-        void *foo;
-        pthread_create(&tid, &attr, calPiByRandom, foo);
+        pthread_create(&tid[i], &attr, calPiByRandom, NULL);
     }
 
     /* now wait for the two threads to exit */
     for (int i = 0; i < 5; i++)
     {
         /* code */
-        pthread_join(tid, NULL);
+        pthread_join(tid[i], NULL);
     }
 
     // Main thread
     double PI = 4 * (double)sharedCounts / total;
     printf("PI calculated from the Monte Carlo random method is: %.5f", PI);
+
+    // Mutex Destroy
+    pthread_mutex_destroy(&mutex);
 
     return 0;
 }
